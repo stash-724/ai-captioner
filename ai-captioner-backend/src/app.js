@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { notFound, errorHandler } from "./middlewares/error.middleware.js";
 import router from "./routes/user.routes.js";
- 
+import postRoutes from "./routes/post.routes.js";
 const app = express();
 
 // Middlewares
@@ -29,6 +29,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/users", router);
 
 // app.use("/api/posts", postRoutes);
+app.use("/api/posts", postRoutes);
 
 // Error handlers
 app.use(notFound);

@@ -1,9 +1,14 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const postSchema = new mongoose.Schema({
+const postSchema = new mongoose.Schema(
+  {
     image: { type: String, required: true }, // URL or path to image
-    caption: { type: String, required: false }, // optional, AI will generate if not given
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true } // ref to User model
-}, { timestamps: true });
+    caption: { type: String }, // optional
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // ref to User
+  },
+  { timestamps: true }
+);
 
-module.exports = mongoose.model("Post", postSchema);
+const Post = mongoose.model("Post", postSchema);
+
+export default Post;
