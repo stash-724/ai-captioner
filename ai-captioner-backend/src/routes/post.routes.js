@@ -1,14 +1,16 @@
-// src/routes/post.routes.js
 import { Router } from "express";
-import { createPost, getPosts } from "../controllers/post.controller.js";
+import multer from "multer";
 import { protect } from "../middlewares/auth.middleware.js";
+import { createPost, getPosts, getUserPosts, deletePost } from "../controllers/post.controller.js";
 
 const router = Router();
+const upload = multer(); // keeps file in memory for base64 conversion
 
-// Create post (protected)
-router.post("/", protect, createPost);
-
-// Get all posts (public)
+router.post("/", protect, upload.single("image"), createPost);
 router.get("/", getPosts);
+
+// New endpoints
+router.get("/me", protect, getUserPosts);
+router.delete("/:id", protect, deletePost);
 
 export default router;
