@@ -5,7 +5,7 @@ It must show real ML work (model comparison, evaluation metrics, embeddings), no
 
 ## Progress
 
-- [ ] Phase 1 – Bug fixes and cleanup
+- [ ] Phase 1 – Bug fixes and cleanup (fixes done; awaiting full Postman run with real .env)
 - [ ] Phase 2 – Caption controls (tone / length, regenerate)
 - [ ] Phase 3 – React frontend (`ai-captioner-frontend/`)
 - [ ] Phase 4 – Semantic search with CLIP + Atlas Vector Search
@@ -22,15 +22,15 @@ Env vars: `MONGODB_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `IMAGEKIT_PUBLIC_KEY`,
 
 ## Phase 1 – Known bugs and cleanup
 
-- [ ] `deletePost` uses `post.remove()` (removed in Mongoose 8) → `deleteOne()`
-- [ ] Hardcoded `image/jpeg` MIME in `ai.service.js` and `.jpg` extension in `imagekit.service.js`
-- [ ] Gemini failure saves "AI caption unavailable" as the caption → return a proper error
-- [ ] Multer has no limits → jpeg/png/webp only, ~5 MB cap
-- [ ] Register/login have no input validation (missing fields → 500)
-- [ ] `services/gemini.service.js` is a stale duplicate → delete
-- [ ] `utils/token.js` empty, `cookie-parser` unused → remove
-- [ ] Default CORS origin → `http://localhost:5173`
-- [ ] Add `.env.example`
+- [x] `deletePost` uses `post.remove()` (removed in Mongoose 8) → `deleteOne()`
+- [x] Hardcoded `image/jpeg` MIME in `ai.service.js` and `.jpg` extension in `imagekit.service.js`
+- [x] Gemini failure saves "AI caption unavailable" as the caption → return a proper error
+- [x] Multer has no limits → jpeg/png/webp only, ~5 MB cap
+- [x] Register/login have no input validation (missing fields → 500)
+- [x] `services/gemini.service.js` is a stale duplicate → delete
+- [x] `utils/token.js` empty, `cookie-parser` unused → remove
+- [x] Default CORS origin → `http://localhost:5173`
+- [x] Add `.env.example`
 
 ## Phase 2 – Caption controls
 

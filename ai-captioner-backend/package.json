@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "test:api": "node tests/make-fixtures.js && postman collection run tests/ai-captioner.postman_collection.json"
   },
   "keywords": [],
   "author": "",
