@@ -7,7 +7,7 @@ It must show real ML work (model comparison, evaluation metrics, embeddings), no
 
 - [x] Phase 1 – Bug fixes and cleanup (all Postman tests pass: `npm run test:api`)
 - [x] Phase 2 – Caption controls (tone / length, regenerate) — rerun `npm run test:api` once Gemini quota allows
-- [ ] Phase 3 – React frontend (`ai-captioner-frontend/`)
+- [x] Phase 3 – React frontend (`ai-captioner-frontend/`): auth, create, feed, my posts done; search page comes with Phase 4
 - [ ] Phase 4 – Semantic search with CLIP + Atlas Vector Search
 - [ ] Phase 5 – Model benchmark: Gemini (Flash-Lite) vs BLIP on COCO (`benchmark/`)
 - [ ] Phase 6 – Docs and deployment (Render, Vercel, Atlas)
