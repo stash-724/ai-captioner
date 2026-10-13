@@ -16,7 +16,7 @@ export const protect = (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("Auth middleware error:", error);
+    console.warn("Auth middleware error:", error.message);
     res.status(401).json({ message: "Token invalid or expired" });
   }
 };

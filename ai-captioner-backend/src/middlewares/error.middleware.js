@@ -6,7 +6,10 @@ export const notFound = (req, res, next) => {
 };
 
 export const errorHandler = (err, req, res, next) => {
-  console.error(err);
+  const status = err.status || (err instanceof multer.MulterError ? 400 : 500);
+  // Client errors are expected; only log full stack traces for server errors
+  if (status < 500) console.warn(`${req.method} ${req.originalUrl} -> ${status}: ${err.message}`);
+  else console.error(err);
 
   if (err instanceof multer.MulterError) {
     const status = err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
