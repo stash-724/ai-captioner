@@ -538,7 +538,7 @@
                   "  pm.expect(post.caption).to.be.a(\"string\").and.not.empty;",
                   "  pm.expect(post.caption).to.not.eql(\"AI caption unavailable\");",
                   "});",
-                  "pm.test(\"image keeps .png extension\", () => pm.expect(post.image).to.match(/.png(?|$)/));",
+                  "pm.test(\"image keeps .png extension\", () => pm.expect(post.image.split(\"?\")[0]).to.match(/[.]png$/));",
                   "console.log(\"Caption:\", post.caption, \"| Image:\", post.image);",
                   "pm.collectionVariables.set(\"postId\", post._id);"
                 ]
