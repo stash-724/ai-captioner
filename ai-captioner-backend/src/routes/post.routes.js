@@ -1,10 +1,9 @@
 import { Router } from "express";
-import multer from "multer";
 import { protect } from "../middlewares/auth.middleware.js";
+import { upload } from "../middlewares/upload.middleware.js";
 import { createPost, getPosts, getUserPosts, deletePost } from "../controllers/post.controller.js";
 
 const router = Router();
-const upload = multer(); // keeps file in memory for base64 conversion
 
 router.post("/", protect, upload.single("image"), createPost);
 router.get("/", getPosts);
