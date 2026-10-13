@@ -3,6 +3,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Post from "../models/Post.js";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const isNonEmptyString = (value) => typeof value === "string" && value.trim().length > 0;
@@ -78,6 +79,24 @@ export const loginUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error logging in user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// @desc Delete the logged-in user's account and all their posts
+// @route DELETE /api/users/me
+// @access Private
+export const deleteAccount = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const { deletedCount } = await Post.deleteMany({ user: user._id });
+    await user.deleteOne();
+
+    res.json({ message: "Account deleted", deletedPosts: deletedCount });
+  } catch (error) {
+    console.error("Error deleting account:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };
