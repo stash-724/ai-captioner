@@ -623,6 +623,7 @@
                   "});",
                   "pm.test(\"image keeps .png extension\", () => pm.expect(post.image.split(\"?\")[0]).to.match(/[.]png$/));",
                   "pm.test(\"stores tone and length\", () => { pm.expect(post.tone).to.eql(\"poetic\"); pm.expect(post.length).to.eql(\"medium\"); });",
+                  "pm.test(\"does not expose the embedding\", () => pm.expect(post).to.not.have.property(\"embedding\"));",
                   "console.log(\"Caption:\", post.caption, \"| Image:\", post.image);",
                   "pm.collectionVariables.set(\"caption\", post.caption);",
                   "pm.collectionVariables.set(\"postId\", post._id);"
@@ -726,6 +727,158 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/posts/me"
+          }
+        },
+        {
+          "name": "Search - missing query",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/posts/search"
+          }
+        },
+        {
+          "name": "Search - query too long",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/posts/search?q=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+          }
+        },
+        {
+          "name": "Search - finds the new post by meaning",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "// Atlas Search indexes new documents asynchronously (a few seconds), so poll until the post appears",
+                  "const postId = pm.collectionVariables.get(\"postId\");",
+                  "const url = pm.variables.replaceIn(pm.request.url.toString());",
+                  "const check = (posts, attempt) => {",
+                  "  if (!posts.some(p => p._id === postId) && attempt < 10) {",
+                  "    return setTimeout(() => pm.sendRequest(url, (err, res) => check(res.json(), attempt + 1)), 2000);",
+                  "  }",
+                  "  pm.test(\"new post is among the results\", () => pm.expect(posts.map(p => p._id)).to.include(postId));",
+                  "  pm.test(\"results have scores, no embeddings\", () => posts.forEach(p => { pm.expect(p.score).to.be.a(\"number\"); pm.expect(p).to.not.have.property(\"embedding\"); }));",
+                  "  pm.test(\"sorted by score\", () => posts.forEach((p, i) => i && pm.expect(p.score).to.be.at.most(posts[i - 1].score)));",
+                  "  console.log(\"Found after\", attempt, \"retries\");",
+                  "};",
+                  "check(pm.response.json(), 0);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/posts/search?q=a%20cartoon%20sun%20over%20a%20green%20field"
+          }
+        },
+        {
+          "name": "Search - unrelated query finds nothing above threshold",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"new post not matched\", () => pm.expect(pm.response.json().map(p => p._id)).to.not.include(pm.collectionVariables.get(\"postId\")));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/posts/search?q=a%20bowl%20of%20pasta"
+          }
+        },
+        {
+          "name": "Similar - invalid id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/posts/not-an-id/similar"
+          }
+        },
+        {
+          "name": "Similar - not found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/posts/000000000000000000000000/similar"
+          }
+        },
+        {
+          "name": "Similar - success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const posts = pm.response.json();",
+                  "pm.test(\"returns an array without the post itself\", () => {",
+                  "  pm.expect(posts).to.be.an(\"array\");",
+                  "  pm.expect(posts.map(p => p._id)).to.not.include(pm.collectionVariables.get(\"postId\"));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/posts/{{postId}}/similar"
           }
         },
         {
