@@ -4,14 +4,29 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const isNonEmptyString = (value) => typeof value === "string" && value.trim().length > 0;
+
 export const registerUser = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password } = req.body ?? {};
+
+    // validate input (also rejects objects like { "$gt": "" } in place of strings)
+    if (![username, email, password].every(isNonEmptyString)) {
+      return res.status(400).json({ message: "Username, email and password are required" });
+    }
+    if (!EMAIL_REGEX.test(email)) {
+      return res.status(400).json({ message: "Invalid email address" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
 
     // check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      const field = existingUser.email === email ? "Email" : "Username";
+      return res.status(400).json({ message: `${field} is already taken` });
     }
 
     // hash password
@@ -30,7 +45,12 @@ export const registerUser = async (req, res) => {
 
 export const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password } = req.body ?? {};
+
+    // validate input
+    if (!isNonEmptyString(email) || !isNonEmptyString(password)) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
 
     // find user
     const user = await User.findOne({ email });

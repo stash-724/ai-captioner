@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Post from "../models/Post.js";
 import { uploadImage } from "../services/imagekit.service.js";
 import { generateCaption } from "../services/ai.service.js";
@@ -66,6 +67,10 @@ export const getUserPosts = async (req, res) => {
 // @access Private
 export const deletePost = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid post id" });
+    }
+
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ message: "Post not found" });
     if (post.user.toString() !== req.user.id) return res.status(403).json({ message: "Unauthorized" });
