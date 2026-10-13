@@ -2,7 +2,7 @@ import { GoogleGenAI, createUserContent } from "@google/genai";
 import { CAPTION_TONES, CAPTION_LENGTHS, DEFAULT_TONE, DEFAULT_LENGTH } from "../constants/caption.js";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+const MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
 
 // Gemini returns 503 when the model is overloaded, which is usually temporary, so retry with backoff.
 // 429 means a quota is used up (the free tier has a daily per-model limit); retrying would only waste requests.
