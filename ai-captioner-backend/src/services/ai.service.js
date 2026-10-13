@@ -1,4 +1,5 @@
 import { GoogleGenAI, createUserContent } from "@google/genai";
+import { CAPTION_TONES, CAPTION_LENGTHS, DEFAULT_TONE, DEFAULT_LENGTH } from "../constants/caption.js";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
@@ -7,9 +8,16 @@ const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 const RETRYABLE_STATUSES = [429, 503];
 const RETRY_DELAYS_MS = [1000, 3000];
 
+export const buildCaptionPrompt = ({ tone = DEFAULT_TONE, length = DEFAULT_LENGTH } = {}) =>
+  `Write a ${CAPTION_TONES[tone]} caption for this image. Length: ${CAPTION_LENGTHS[length]}. ` +
+  "Reply with only the caption text, without quotes, hashtags or any explanation.";
+
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-export const generateCaption = async (imageBuffer, mimeType, prompt = "Write a short, catchy caption for this image") => {
+// Models sometimes wrap the caption in quotes despite the instructions
+const cleanCaption = (text) => text.trim().replace(/^["'“”]+|["'“”]+$/g, "").trim();
+
+export const generateCaption = async (imageBuffer, mimeType, prompt = buildCaptionPrompt()) => {
   const contents = createUserContent([
     {
       inlineData: {
@@ -25,7 +33,7 @@ export const generateCaption = async (imageBuffer, mimeType, prompt = "Write a s
       const response = await ai.models.generateContent({ model: MODEL, contents });
 
       if (!response.text) throw new Error("No caption returned");
-      return response.text.trim();
+      return cleanCaption(response.text);
 
     } catch (err) {
       const canRetry = RETRYABLE_STATUSES.includes(err.status) && attempt < RETRY_DELAYS_MS.length;

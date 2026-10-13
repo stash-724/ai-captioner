@@ -1,7 +1,21 @@
 import mongoose from "mongoose";
 import Post from "../models/Post.js";
 import { uploadImage } from "../services/imagekit.service.js";
-import { generateCaption } from "../services/ai.service.js";
+import { generateCaption, buildCaptionPrompt } from "../services/ai.service.js";
+import { CAPTION_TONES, CAPTION_LENGTHS, DEFAULT_TONE, DEFAULT_LENGTH } from "../constants/caption.js";
+
+// Reads optional tone/length; returns an error message if either value is unknown
+const parseCaptionOptions = (body = {}, defaults = {}) => {
+  const tone = body.tone || defaults.tone || DEFAULT_TONE;
+  const length = body.length || defaults.length || DEFAULT_LENGTH;
+  if (!Object.hasOwn(CAPTION_TONES, tone)) {
+    return { error: `tone must be one of: ${Object.keys(CAPTION_TONES).join(", ")}` };
+  }
+  if (!Object.hasOwn(CAPTION_LENGTHS, length)) {
+    return { error: `length must be one of: ${Object.keys(CAPTION_LENGTHS).join(", ")}` };
+  }
+  return { tone, length };
+};
 
 // @desc Create new post
 // @route POST /api/posts
@@ -12,10 +26,13 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ message: "No image provided" });
     }
 
+    const { tone, length, error } = parseCaptionOptions(req.body);
+    if (error) return res.status(400).json({ message: error });
+
     const { buffer, mimetype } = req.file;
 
     // Generate the caption first so a Gemini failure doesn't leave an orphaned upload
-    const caption = await generateCaption(buffer, mimetype, "Write a short, witty, and catchy caption for this image in 5 words or less.");
+    const caption = await generateCaption(buffer, mimetype, buildCaptionPrompt({ tone, length }));
     console.log("Generated caption:", caption);
 
     const imageUrl = await uploadImage(buffer, mimetype);
@@ -23,6 +40,8 @@ export const createPost = async (req, res) => {
     const newPost = new Post({
       image: imageUrl,
       caption,
+      tone,
+      length,
       user: req.user.id,
     });
 
@@ -79,6 +98,43 @@ export const deletePost = async (req, res) => {
     res.json({ message: "Post deleted successfully" });
   } catch (error) {
     console.error("Error deleting post:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// @desc Regenerate a post's caption, optionally with a new tone/length
+// @route POST /api/posts/:id/regenerate
+// @access Private
+export const regenerateCaption = async (req, res) => {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({ message: "Invalid post id" });
+    }
+
+    const post = await Post.findById(req.params.id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    if (post.user.toString() !== req.user.id) return res.status(403).json({ message: "Unauthorized" });
+
+    // Unspecified options keep the post's current tone/length
+    const { tone, length, error } = parseCaptionOptions(req.body, post);
+    if (error) return res.status(400).json({ message: error });
+
+    // Fetch the stored image back from ImageKit
+    const imageRes = await fetch(post.image);
+    if (!imageRes.ok) throw new Error(`Failed to fetch image (${imageRes.status})`);
+    const buffer = Buffer.from(await imageRes.arrayBuffer());
+    const mimetype = imageRes.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+
+    post.caption = await generateCaption(buffer, mimetype, buildCaptionPrompt({ tone, length }));
+    post.tone = tone;
+    post.length = length;
+    await post.save();
+    await post.populate("user", "username email");
+
+    res.json(post);
+  } catch (error) {
+    console.error("Error regenerating caption:", error);
+    if (error.status) return res.status(error.status).json({ message: error.message });
     res.status(500).json({ message: "Internal server error" });
   }
 };
