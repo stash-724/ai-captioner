@@ -60,7 +60,7 @@ export const createPost = async (req, res) => {
 // @access Public
 export const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate("user", "username email");
+    const posts = await Post.find().sort({ createdAt: -1 }).populate("user", "username email");
     res.json(posts);
   } catch (error) {
     console.error("Error fetching posts:", error);
@@ -73,7 +73,7 @@ export const getPosts = async (req, res) => {
 // @access Private
 export const getUserPosts = async (req, res) => {
   try {
-    const posts = await Post.find({ user: req.user.id }).populate("user", "username email");
+    const posts = await Post.find({ user: req.user.id }).sort({ createdAt: -1 }).populate("user", "username email");
     res.json(posts);
   } catch (error) {
     console.error("Error fetching user posts:", error);
