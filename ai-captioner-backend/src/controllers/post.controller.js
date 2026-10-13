@@ -11,12 +11,13 @@ export const createPost = async (req, res) => {
       return res.status(400).json({ message: "No image provided" });
     }
 
-    const base64 = req.file.buffer.toString("base64");
-    const imageUrl = await uploadImage(`data:${req.file.mimetype};base64,${base64}`);
+    const { buffer, mimetype } = req.file;
 
-    // Always generate caption using Gemini
-    const caption = await generateCaption(req.file.buffer, "Write a short, witty, and catchy caption for this image in 5 words or less.");
+    // Generate the caption first so a Gemini failure doesn't leave an orphaned upload
+    const caption = await generateCaption(buffer, mimetype, "Write a short, witty, and catchy caption for this image in 5 words or less.");
     console.log("Generated caption:", caption);
+
+    const imageUrl = await uploadImage(buffer, mimetype);
 
     const newPost = new Post({
       image: imageUrl,
@@ -29,6 +30,7 @@ export const createPost = async (req, res) => {
 
   } catch (error) {
     console.error("Error creating post:", error);
+    if (error.status) return res.status(error.status).json({ message: error.message });
     res.status(500).json({ message: "Internal server error" });
   }
 };

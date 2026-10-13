@@ -1,8 +1,8 @@
-import { GoogleGenAI, createUserContent, createPartFromUri } from "@google/genai";
+import { GoogleGenAI, createUserContent } from "@google/genai";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-export const generateCaption = async (imageBuffer, prompt = "Write a short, catchy caption for this image") => {
+export const generateCaption = async (imageBuffer, mimeType, prompt = "Write a short, catchy caption for this image") => {
   try {
     const base64Image = imageBuffer.toString("base64");
 
@@ -11,7 +11,7 @@ export const generateCaption = async (imageBuffer, prompt = "Write a short, catc
       contents: createUserContent([
         {
           inlineData: {
-            mimeType: "image/jpeg",
+            mimeType,
             data: base64Image,
           },
         },
@@ -20,10 +20,12 @@ export const generateCaption = async (imageBuffer, prompt = "Write a short, catc
     });
 
     if (!response.text) throw new Error("No caption returned");
-    return response.text;
+    return response.text.trim();
 
   } catch (err) {
     console.error("Gemini AI caption error:", err);
-    return "AI caption unavailable";
+    const error = new Error("Caption generation failed, please try again");
+    error.status = 502;
+    throw error;
   }
 };
