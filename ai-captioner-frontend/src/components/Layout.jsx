@@ -39,6 +39,9 @@ function Navbar() {
       <NavLink to="/" end className={navLinkClass}>
         Feed
       </NavLink>
+      <NavLink to="/search" className={navLinkClass}>
+        Search
+      </NavLink>
       {isAuthenticated && (
         <>
           <NavLink to="/create" className={navLinkClass}>
@@ -142,7 +145,7 @@ export default function Layout() {
         <Outlet />
       </main>
       <footer className="border-t border-zinc-200 py-6 text-center text-xs text-zinc-500 dark:border-zinc-800">
-        Built with React, Express, MongoDB and Google Gemini
+        Built with React, Express, MongoDB, Google Gemini and CLIP
       </footer>
     </div>
   )

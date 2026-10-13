@@ -74,4 +74,9 @@ export const api = {
     request(`/api/posts/${id}/regenerate`, { method: 'POST', body: { tone, length } }),
 
   deletePost: (id) => request(`/api/posts/${id}`, { method: 'DELETE' }),
+
+  searchPosts: (query, { signal } = {}) =>
+    request(`/api/posts/search?q=${encodeURIComponent(query)}`, { signal }),
+
+  getSimilarPosts: (id, { signal } = {}) => request(`/api/posts/${id}/similar`, { signal }),
 }

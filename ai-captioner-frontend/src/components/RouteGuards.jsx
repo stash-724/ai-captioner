@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useState } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { useAuth } from '../context/AuthContext'
 
@@ -15,7 +15,7 @@ export function ProtectedRoute() {
 // and redirecting here as well would race it and send the user to the wrong place.
 export function GuestRoute() {
   const { isAuthenticated } = useAuth()
-  const loggedInOnArrival = useRef(isAuthenticated)
-  if (loggedInOnArrival.current) return <Navigate to="/" replace />
+  const [loggedInOnArrival] = useState(isAuthenticated)
+  if (loggedInOnArrival) return <Navigate to="/" replace />
   return <Outlet />
 }

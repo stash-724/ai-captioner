@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { ImageOff } from 'lucide-react'
+import { Link } from 'react-router'
+import { ImageOff, ScanSearch } from 'lucide-react'
 import Avatar from './Avatar'
 import { Badge } from './ui'
 import { imageUrl, timeAgo } from '../lib/format'
@@ -27,7 +28,8 @@ function PostImage({ src, alt }) {
   return <img src={src} alt={alt} loading="lazy" onError={() => setFailed(true)} className="h-auto w-full" />
 }
 
-export default function PostCard({ post, busy = false, children }) {
+// score: Atlas vector-search score ((1 + cosine) / 2), shown on search results
+export default function PostCard({ post, busy = false, score, label, children }) {
   const username = post.user?.username ?? 'unknown'
   return (
     <article className="mb-5 break-inside-avoid overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
@@ -37,6 +39,21 @@ export default function PostCard({ post, busy = false, children }) {
           <div className="absolute top-3 left-3 flex gap-1.5">
             <Badge>{post.tone}</Badge>
             {post.length && <Badge>{post.length}</Badge>}
+          </div>
+        )}
+        {score !== undefined && (
+          <div className="absolute top-3 right-3 flex gap-1.5">
+            {label && (
+              <span className="rounded-full bg-orange-600 px-2.5 py-1 text-xs font-medium text-white shadow-sm">
+                {label}
+              </span>
+            )}
+            <span
+              className="rounded-full bg-black/55 px-2.5 py-1 font-mono text-xs text-white backdrop-blur-sm"
+              title="Cosine similarity between the CLIP embeddings"
+            >
+              {(2 * score - 1).toFixed(2)}
+            </span>
           </div>
         )}
       </div>
@@ -51,9 +68,17 @@ export default function PostCard({ post, busy = false, children }) {
             <Avatar name={username} />
             <span className="truncate font-medium text-zinc-700 dark:text-zinc-300">{username}</span>
           </span>
-          <time dateTime={post.createdAt} className="shrink-0">
-            {timeAgo(post.createdAt)}
-          </time>
+          <span className="flex shrink-0 items-center gap-3">
+            <Link
+              to={`/search?like=${post._id}`}
+              state={{ source: post }}
+              className="inline-flex items-center gap-1 rounded-md font-medium text-zinc-500 transition hover:text-orange-600"
+              title="Find posts with similar images"
+            >
+              <ScanSearch className="size-3.5" aria-hidden /> Similar
+            </Link>
+            <time dateTime={post.createdAt}>{timeAgo(post.createdAt)}</time>
+          </span>
         </div>
         {children}
       </div>

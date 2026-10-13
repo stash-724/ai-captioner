@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
 import CreatePage from './pages/CreatePage'
 import MyPostsPage from './pages/MyPostsPage'
+import SearchPage from './pages/SearchPage'
 import NotFoundPage from './pages/NotFoundPage'
 
 const router = createBrowserRouter([
@@ -17,6 +18,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <FeedPage /> },
+      { path: 'search', element: <SearchPage /> },
       {
         element: <GuestRoute />,
         children: [
