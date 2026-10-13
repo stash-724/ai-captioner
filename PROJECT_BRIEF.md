@@ -5,20 +5,20 @@ It must show real ML work (model comparison, evaluation metrics, embeddings), no
 
 ## Progress
 
-- [ ] Phase 1 – Bug fixes and cleanup (fixes done; awaiting full Postman run with real .env)
+- [x] Phase 1 – Bug fixes and cleanup (all Postman tests pass: `npm run test:api`)
 - [ ] Phase 2 – Caption controls (tone / length, regenerate)
 - [ ] Phase 3 – React frontend (`ai-captioner-frontend/`)
 - [ ] Phase 4 – Semantic search with CLIP + Atlas Vector Search
-- [ ] Phase 5 – Model benchmark: Gemini 2.5 Flash vs BLIP on COCO (`benchmark/`)
+- [ ] Phase 5 – Model benchmark: Gemini 3.8 Flash vs BLIP on COCO (`benchmark/`)
 - [ ] Phase 6 – Docs and deployment (Render, Vercel, Atlas)
 
 ## Current backend (`ai-captioner-backend/`)
 
 Node.js (ES modules), Express 5, MongoDB/Mongoose 8, JWT auth (bcryptjs), Multer (memory),
-ImageKit for storage, Google Gemini 2.5 Flash (`@google/genai`) for captions.
+ImageKit for storage, Google Gemini (`@google/genai`) for captions — model set by `GEMINI_MODEL`, default `gemini-3.8-flash` (2.5 Flash is closed to new API keys).
 
 Env vars: `MONGODB_URI`, `JWT_SECRET`, `GEMINI_API_KEY`, `IMAGEKIT_PUBLIC_KEY`,
-`IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT`, `CORS_ORIGIN`, `PORT`. Never commit `.env`.
+`IMAGEKIT_PRIVATE_KEY`, `IMAGEKIT_URL_ENDPOINT`, `CORS_ORIGIN`, `PORT`, `GEMINI_MODEL`, optional `DNS_SERVERS` (Windows SRV lookup fix). Never commit `.env`.
 
 ## Phase 1 – Known bugs and cleanup
 
@@ -52,7 +52,7 @@ preview and tone/length controls, public feed, my posts with delete, search. Cle
 
 In `benchmark/`, Colab-compatible notebook or script:
 - Random subset of 100–200 COCO val2017 images (5 reference captions each), fixed seed
-- Captions from Gemini 2.5 Flash (same neutral descriptive prompt) and BLIP (`Salesforce/blip-image-captioning-base`)
+- Captions from Gemini (`gemini-3.8-flash`, same neutral descriptive prompt) and BLIP (`Salesforce/blip-image-captioning-base`)
 - Metrics: BLEU-4, METEOR, CIDEr (pycocoevalcap), reference-free CLIPScore (torchmetrics), average latency
 - Output `benchmark/results.json`, a markdown table, and qualitative examples where the models disagree
 - **Only real measured numbers. Never invent or estimate metrics.**
