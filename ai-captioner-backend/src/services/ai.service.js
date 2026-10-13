@@ -4,9 +4,9 @@ import { CAPTION_TONES, CAPTION_LENGTHS, DEFAULT_TONE, DEFAULT_LENGTH } from "..
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
-// Gemini returns 503 when overloaded and 429 when rate-limited; both are usually temporary
-const RETRYABLE_STATUSES = [429, 503];
-const RETRY_DELAYS_MS = [1000, 3000];
+// Gemini returns 503 when the model is overloaded, which is usually temporary, so retry with backoff.
+// 429 means a quota is used up (the free tier has a daily per-model limit); retrying would only waste requests.
+const RETRY_DELAYS_MS = [2000, 5000, 10000];
 
 export const buildCaptionPrompt = ({ tone = DEFAULT_TONE, length = DEFAULT_LENGTH } = {}) =>
   `Write a ${CAPTION_TONES[tone]} caption for this image. Length: ${CAPTION_LENGTHS[length]}. ` +
@@ -36,18 +36,22 @@ export const generateCaption = async (imageBuffer, mimeType, prompt = buildCapti
       return cleanCaption(response.text);
 
     } catch (err) {
-      const canRetry = RETRYABLE_STATUSES.includes(err.status) && attempt < RETRY_DELAYS_MS.length;
+      const canRetry = err.status === 503 && attempt < RETRY_DELAYS_MS.length;
       console.error(`Gemini AI caption error (attempt ${attempt + 1}${canRetry ? ", retrying" : ""}):`, err.message);
       if (canRetry) {
         await sleep(RETRY_DELAYS_MS[attempt]);
         continue;
       }
 
-      const busy = RETRYABLE_STATUSES.includes(err.status);
-      const error = new Error(busy
-        ? "The caption service is busy right now, please try again in a minute"
-        : "Caption generation failed, please try again");
-      error.status = busy ? 503 : 502;
+      const error = new Error("Caption generation failed, please try again");
+      error.status = 502;
+      if (err.status === 503) {
+        error.message = "The caption service is busy right now, please try again in a minute";
+        error.status = 503;
+      } else if (err.status === 429) {
+        error.message = "Caption limit reached, please try again later";
+        error.status = 429;
+      }
       throw error;
     }
   }
