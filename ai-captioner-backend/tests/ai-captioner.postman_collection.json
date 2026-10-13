@@ -525,7 +525,85 @@
           }
         },
         {
-          "name": "Create post - success",
+          "name": "Create post - invalid tone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "tests/fixtures/sample.png"
+                },
+                {
+                  "key": "tone",
+                  "value": "sarcastic",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/posts"
+          }
+        },
+        {
+          "name": "Create post - invalid length",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "image",
+                  "type": "file",
+                  "src": "tests/fixtures/sample.png"
+                },
+                {
+                  "key": "length",
+                  "value": "huge",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": "{{baseUrl}}/api/posts"
+          }
+        },
+        {
+          "name": "Create post - success (poetic, medium)",
           "event": [
             {
               "listen": "test",
@@ -539,7 +617,9 @@
                   "  pm.expect(post.caption).to.not.eql(\"AI caption unavailable\");",
                   "});",
                   "pm.test(\"image keeps .png extension\", () => pm.expect(post.image.split(\"?\")[0]).to.match(/[.]png$/));",
+                  "pm.test(\"stores tone and length\", () => { pm.expect(post.tone).to.eql(\"poetic\"); pm.expect(post.length).to.eql(\"medium\"); });",
                   "console.log(\"Caption:\", post.caption, \"| Image:\", post.image);",
+                  "pm.collectionVariables.set(\"caption\", post.caption);",
                   "pm.collectionVariables.set(\"postId\", post._id);"
                 ]
               }
@@ -560,6 +640,16 @@
                   "key": "image",
                   "type": "file",
                   "src": "tests/fixtures/sample.png"
+                },
+                {
+                  "key": "tone",
+                  "value": "poetic",
+                  "type": "text"
+                },
+                {
+                  "key": "length",
+                  "value": "medium",
+                  "type": "text"
                 }
               ]
             },
@@ -631,6 +721,168 @@
             "method": "GET",
             "header": [],
             "url": "{{baseUrl}}/api/posts/me"
+          }
+        },
+        {
+          "name": "Regenerate - no token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": "{{baseUrl}}/api/posts/{{postId}}/regenerate"
+          }
+        },
+        {
+          "name": "Regenerate - invalid id",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/posts/not-an-id/regenerate"
+          }
+        },
+        {
+          "name": "Regenerate - not found",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/posts/000000000000000000000000/regenerate"
+          }
+        },
+        {
+          "name": "Regenerate - other user's post",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token2}}"
+              }
+            ],
+            "url": "{{baseUrl}}/api/posts/{{postId}}/regenerate"
+          }
+        },
+        {
+          "name": "Regenerate - invalid tone",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tone\": \"sarcastic\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/posts/{{postId}}/regenerate"
+          }
+        },
+        {
+          "name": "Regenerate - success (descriptive, keeps length)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+                  "const post = pm.response.json();",
+                  "pm.test(\"new tone, kept length\", () => { pm.expect(post.tone).to.eql(\"descriptive\"); pm.expect(post.length).to.eql(\"medium\"); });",
+                  "pm.test(\"has a caption\", () => pm.expect(post.caption).to.be.a(\"string\").and.not.empty);",
+                  "pm.test(\"same post\", () => pm.expect(post._id).to.eql(pm.collectionVariables.get(\"postId\")));",
+                  "console.log(\"Before:\", pm.collectionVariables.get(\"caption\"), \"| After:\", post.caption);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tone\": \"descriptive\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{baseUrl}}/api/posts/{{postId}}/regenerate"
           }
         },
         {
