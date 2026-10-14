@@ -51,7 +51,7 @@ image. Comparing the two families is the point of the benchmark.
 4. Run all cells with `SMOKE_TEST = True` (5 images, a few minutes) to check the pipeline.
 5. Set `SMOKE_TEST = False` and run all cells again for the full benchmark.
 
-Gemini captions are cached after every request (on Google Drive when `USE_DRIVE = True`). If the daily
+Gemini captions are cached after every request. Set `USE_DRIVE = True` to keep the cache on Google Drive (optional; it asks for broad Drive permissions). If the daily
 free quota runs out, run the notebook again later and it continues from where it stopped.
 
 The outputs (`results.json`, `results.md`, `examples.md`, `captions.json`) go into `results/` in this folder.
