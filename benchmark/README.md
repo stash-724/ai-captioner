@@ -25,7 +25,7 @@ same images, using the standard captioning metrics plus a reference-free one.
 | **BLEU-4** | Fraction of 1- to 4-word phrases in the caption that also appear in the references (geometric mean), with a penalty for captions shorter than the references. From machine translation. | Yes |
 | **METEOR** | Matches words exactly, by stem or by synonym, combines precision and recall (weighted towards recall), and penalises scrambled word order. | Yes |
 | **CIDEr** | Represents captions as TF-IDF-weighted n-gram vectors and takes the cosine similarity with each reference. Words that are rare across the dataset (*giraffe*) count far more than common ones (*a*, *is*). Built for captioning; COCO leaderboards rank by it. | Yes |
-| **CLIPScore** | Cosine similarity between the CLIP embedding of the image and the CLIP embedding of the caption: does the caption describe *this image*? torchmetrics reports `100 × max(cos, 0)`. | **No** |
+| **CLIPScore** | Cosine similarity between the CLIP embedding of the image and the CLIP embedding of the caption: does the caption describe *this image*? Reported as `100 × max(cos, 0)` (computed with Hugging Face `CLIPModel`, ViT-B/32). | **No** |
 | **Latency** | Wall-clock time per caption. BLIP is local GPU inference; Gemini includes the network round trip and the free tier's queueing, so the two are not like-for-like. | n/a |
 
 The reference-based metrics reward phrasing captions the way COCO's annotators did: short, plain,
