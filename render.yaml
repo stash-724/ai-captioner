@@ -1,0 +1,33 @@
+# Render Blueprint: deploys the Express API (ai-captioner-backend) on the free plan.
+# Render dashboard -> New -> Blueprint -> pick this repo. Secrets marked "sync: false"
+# are entered in the dashboard and never stored in git.
+services:
+  - type: web
+    name: ai-captioner-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: ai-captioner-backend
+    branch: main
+    # Download the CLIP models during the build so cold starts load them from disk
+    buildCommand: npm ci && npm run models:prefetch
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.1-flash-lite
+      - key: IMAGEKIT_PUBLIC_KEY
+        sync: false
+      - key: IMAGEKIT_PRIVATE_KEY
+        sync: false
+      - key: IMAGEKIT_URL_ENDPOINT
+        sync: false
+      # The Vercel URL of the frontend (comma-separated if there are several)
+      - key: CORS_ORIGIN
+        sync: false

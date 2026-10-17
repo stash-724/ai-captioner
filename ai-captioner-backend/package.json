@@ -8,7 +8,8 @@
     "dev": "nodemon src/server.js",
     "test:api": "node tests/make-fixtures.js && postman collection run tests/ai-captioner.postman_collection.json",
     "search:index": "node scripts/create-vector-index.js",
-    "search:backfill": "node scripts/backfill-embeddings.js"
+    "search:backfill": "node scripts/backfill-embeddings.js",
+    "models:prefetch": "node scripts/prefetch-models.js"
   },
   "keywords": [],
   "author": "",
@@ -33,5 +34,8 @@
     "watch": [
       "src"
     ]
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

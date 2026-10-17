@@ -1,13 +1,20 @@
 // src/services/embedding.service.js
 // CLIP maps images and text into the same 512-dimensional vector space, so a text query
 // can be compared directly with image embeddings (cosine similarity) for semantic search.
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   AutoProcessor,
   AutoTokenizer,
   CLIPTextModelWithProjection,
   CLIPVisionModelWithProjection,
   RawImage,
+  env,
 } from "@huggingface/transformers";
+
+// Keep downloaded models inside the project, so a build step can fetch them once
+// (npm run models:prefetch) and production starts without re-downloading ~150 MB
+env.cacheDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.model-cache");
 
 const MODEL_ID = "Xenova/clip-vit-base-patch32";
 // 8-bit quantized weights: ~154 MB instead of ~606 MB, with a negligible accuracy cost
@@ -35,6 +42,8 @@ const loadModels = () => {
   });
   return modelsPromise;
 };
+
+export const preloadModels = loadModels;
 
 // Start loading in the background so the first upload or search isn't slow
 export const warmUpEmbeddings = () =>
