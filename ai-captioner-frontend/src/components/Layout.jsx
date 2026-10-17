@@ -3,6 +3,7 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { LogOut, Menu, Sparkles, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import Avatar from './Avatar'
+import ServerWakeBanner from './ServerWakeBanner'
 import { buttonClasses } from './ui'
 
 const navLinkClass = ({ isActive }) =>
@@ -140,6 +141,7 @@ function Navbar() {
 export default function Layout() {
   return (
     <div className="flex min-h-dvh flex-col">
+      <ServerWakeBanner />
       <Navbar />
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-10 sm:px-6">
         <Outlet />

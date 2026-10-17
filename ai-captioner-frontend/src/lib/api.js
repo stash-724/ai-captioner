@@ -52,6 +52,8 @@ async function request(path, { method = 'GET', body, signal } = {}) {
 }
 
 export const api = {
+  health: () => request('/api/health'),
+
   register: ({ username, email, password }) =>
     request('/api/users/register', { method: 'POST', body: { username, email, password } }),
 
