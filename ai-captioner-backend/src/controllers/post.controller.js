@@ -3,6 +3,7 @@ import Post from "../models/Post.js";
 import { uploadImage } from "../services/imagekit.service.js";
 import { generateCaption, buildCaptionPrompt } from "../services/ai.service.js";
 import { embedImage, embedText } from "../services/embedding.service.js";
+import { prepareImage } from "../services/image.service.js";
 import { findNearestPosts } from "../services/search.service.js";
 import { CAPTION_TONES, CAPTION_LENGTHS, DEFAULT_TONE, DEFAULT_LENGTH } from "../constants/caption.js";
 
@@ -31,7 +32,8 @@ export const createPost = async (req, res) => {
     const { tone, length, error } = parseCaptionOptions(req.body);
     if (error) return res.status(400).json({ message: error });
 
-    const { buffer, mimetype } = req.file;
+    // Downscale before captioning, embedding and storing (keeps memory low on small servers)
+    const { buffer, mimetype } = await prepareImage(req.file.buffer, req.file.mimetype);
 
     // Caption (Gemini) and CLIP embedding (local) run in parallel, before the upload,
     // so a Gemini failure doesn't leave an orphaned image. A failed embedding doesn't
@@ -133,8 +135,10 @@ export const regenerateCaption = async (req, res) => {
     // Fetch the stored image back from ImageKit
     const imageRes = await fetch(post.image);
     if (!imageRes.ok) throw new Error(`Failed to fetch image (${imageRes.status})`);
-    const buffer = Buffer.from(await imageRes.arrayBuffer());
-    const mimetype = imageRes.headers.get("content-type")?.split(";")[0] || "image/jpeg";
+    const { buffer, mimetype } = await prepareImage(
+      Buffer.from(await imageRes.arrayBuffer()),
+      imageRes.headers.get("content-type")?.split(";")[0] || "image/jpeg"
+    );
 
     post.caption = await generateCaption(buffer, mimetype, buildCaptionPrompt({ tone, length }));
     post.tone = tone;
