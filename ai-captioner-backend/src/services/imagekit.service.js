@@ -6,11 +6,17 @@ const imagekit = new ImageKit({
   urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
 });
 
-export const uploadImage = async (file) => {
+const EXTENSIONS = {
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp",
+};
+
+export const uploadImage = async (fileBuffer, mimeType) => {
   try {
     const result = await imagekit.upload({
-      file, // base64 string or file buffer
-      fileName: `post_${Date.now()}.jpg`,
+      file: fileBuffer,
+      fileName: `post_${Date.now()}.${EXTENSIONS[mimeType] || "jpg"}`,
       folder: "/ai-captioner"
     });
     console.log("Image uploaded:", result.url);

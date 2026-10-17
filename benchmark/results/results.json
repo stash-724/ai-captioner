@@ -1,0 +1,90 @@
+{
+  "scored_at": "2026-10-14T20:32:39+00:00",
+  "dataset": "COCO val2017",
+  "seed": 42,
+  "n_sampled": 150,
+  "n_evaluated": 149,
+  "models": {
+    "Gemini": {
+      "id": "gemini-3.1-flash-lite",
+      "prompt": "Write a one-sentence caption that describes this image.",
+      "temperature": 0.0
+    },
+    "BLIP": {
+      "id": "Salesforce/blip-image-captioning-base",
+      "generation": {
+        "num_beams": 3,
+        "max_length": 30,
+        "min_length": 5
+      }
+    }
+  },
+  "scoring": {
+    "tokenizer": "pure-Python PTB-style (lowercase, clitic split, punctuation removed)",
+    "bleu_cider": "pycocoevalcap (BLEU-4 corpus, CIDEr-D)",
+    "meteor": "nltk.translate.meteor_score, mean of per-image scores",
+    "clipscore": "100 * max(cos, 0), openai/clip-vit-base-patch32, computed in the notebook"
+  },
+  "human_baseline": {
+    "BLEU-4": 0.21716706361826316,
+    "CIDEr": 1.0199856763794968,
+    "METEOR": 0.46860819958353217
+  },
+  "metrics": {
+    "Gemini": {
+      "BLEU-4": 0.13137719620927418,
+      "CIDEr": 0.3857933111606794,
+      "METEOR": 0.4936549169677829,
+      "CLIPScore": 34.00705128708142,
+      "avg_words": 18.845637583892618,
+      "latency": {
+        "mean_s": 3.044439372738259,
+        "median_s": 2.489699223999878,
+        "p95_s": 5.9166482794000315
+      }
+    },
+    "BLIP": {
+      "BLEU-4": 0.34808073586660043,
+      "CIDEr": 1.21344688345665,
+      "METEOR": 0.4965842010179126,
+      "CLIPScore": 29.39691311561021,
+      "avg_words": 8.369127516778523,
+      "latency": {
+        "mean_s": 0.24409141736912673,
+        "median_s": 0.24462801599997874,
+        "p95_s": 0.3222546185999818
+      }
+    }
+  },
+  "paired_comparison": {
+    "CIDEr": {
+      "mean_diff_gemini_minus_blip": -0.8276535722959706,
+      "ci95": [
+        -0.9743902803847136,
+        -0.6921294817729436
+      ],
+      "gemini_win_rate": 0.12751677852348994
+    },
+    "METEOR": {
+      "mean_diff_gemini_minus_blip": -0.0029292840501295722,
+      "ci95": [
+        -0.034684422124905356,
+        0.030914216243275037
+      ],
+      "gemini_win_rate": 0.5033557046979866
+    },
+    "CLIPScore": {
+      "mean_diff_gemini_minus_blip": 4.610138171471205,
+      "ci95": [
+        4.011283642393631,
+        5.221296164813457
+      ],
+      "gemini_win_rate": 0.9328859060402684
+    }
+  },
+  "gemini": {
+    "retries": 4,
+    "failed_images": 1
+  },
+  "reference_avg_words": 10.431635388739947
+}
