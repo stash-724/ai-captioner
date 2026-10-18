@@ -10,7 +10,7 @@ It must show real ML work (model comparison, evaluation metrics, embeddings), no
 - [x] Phase 3 – React frontend (`ai-captioner-frontend/`): auth, create, feed, my posts, search
 - [x] Phase 4 – Semantic search with CLIP + Atlas Vector Search (`npm run search:index` / `search:backfill`)
 - [x] Phase 5 – Model benchmark: Gemini (Flash-Lite) vs BLIP on 149 COCO images (`benchmark/`, results in `benchmark/README.md`)
-- [ ] Phase 6 – Docs and deployment (Render, Vercel, Atlas)
+- [x] Phase 6 – Docs and deployment: README, live at https://ai-captioner-tau.vercel.app (API on Render, DB on Atlas)
 
 ## Current backend (`ai-captioner-backend/`)
 
@@ -67,6 +67,7 @@ with short analysis, screenshots, live demo link. Backend → Render, frontend �
 - Match existing style: ES modules, controllers/services/routes, async/await with try/catch
 - One phase at a time; test each (backend via Postman CLI, frontend locally)
 - Small descriptive commit per logical change; don't push until approved
+- No Claude co-author or attribution lines (e.g. "Co-Authored-By: Claude") in commits or PR descriptions
 - Ask before creating accounts, using paid APIs, or deploying
 - Explain ML concepts (CIDEr, BLEU, CLIPScore, embeddings, vector search) along the way
 
