@@ -64,7 +64,7 @@ image in about half a second on a CPU, and fits in a 512 MB free instance.
 | AI | Google Gemini (`@google/genai`), CLIP ViT-B/32 via `@huggingface/transformers` (ONNX, q8) |
 | Data | MongoDB Atlas with Vector Search, ImageKit |
 | Benchmark | Python, PyTorch, Hugging Face Transformers (BLIP, CLIP), pycocoevalcap, NLTK |
-| Testing | Postman CLI (52 requests, 65 assertions) |
+| Testing | Postman CLI (47 requests, 65 assertions) |
 | Hosting | Vercel (frontend), Render (API), MongoDB Atlas M0 |
 
 ## Benchmark: Gemini vs BLIP
